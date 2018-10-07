@@ -21,8 +21,8 @@ func TestList_EndToEnd(t *testing.T) {
 
 	listInput := fields{
 		[]*list.Column{
-			{Name: "first"},
-			{Name: "second"},
+			{Label: "first"},
+			{Label: "second"},
 		},
 		list.MemoryDataProviderFunc(func() [][]string {
 			return [][]string{

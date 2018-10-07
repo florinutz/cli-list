@@ -6,14 +6,49 @@ type List struct {
 	Data    [][]string
 }
 
+func (l *List) WriteRow(inputValues map[*Column]interface{}) error {
+	var inputDiff, listDiff []*Column
+
+	listCols := l.Columns
+
+	for inputCol := range inputValues {
+		valid := false
+		for _, listCol := range listCols {
+			if inputCol.Id > 0 && inputCol.Id == listCol.Id {
+				valid = false
+			}
+		}
+		if !valid {
+			inputDiff = append(inputDiff, inputCol)
+		}
+	}
+
+	for _, listCol := range listCols {
+		valid := false
+		for inputCol := range inputValues {
+			if inputCol.Label == listCol.Label {
+				valid = false
+			}
+		}
+		if !valid {
+			listDiff = append(listDiff, listCol)
+		}
+	}
+}
+
 // Column represents a List column
 type Column struct {
-	Name string
+	Id    int
+	Label string
 }
 
 // DataProvider provides the data for a List
 type DataProvider interface {
 	GetData() [][]string
+}
+
+type RowWriter interface {
+	WriteRow(values map[*Column]interface{}) error
 }
 
 // Flattener can display a List
@@ -42,7 +77,7 @@ func (l *List) GetData() [][]string {
 // GetColumnNames returns column names
 func (l *List) GetColumnNames() (names []string) {
 	for _, col := range l.Columns {
-		names = append(names, col.Name)
+		names = append(names, col.Label)
 	}
 
 	return
