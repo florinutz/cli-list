@@ -6,12 +6,14 @@ type List struct {
 	Data    [][]string
 }
 
-func (l *List) WriteRow(inputValues map[*Column]interface{}) error {
-	var inputDiff, listDiff []*Column
+func (l *List) WriteRow(incomingValues map[*Column]interface{}) (listDiff, inputDiff []*Column, err error) {
+	inputDiff, listDiff = getColDiffs(incomingValues, l.Columns)
 
-	listCols := l.Columns
+	return listDiff, inputDiff, nil
+}
 
-	for inputCol := range inputValues {
+func getColDiffs(incomingValues map[*Column]interface{}, listCols []*Column) (inputDiff, listDiff []*Column) {
+	for inputCol := range incomingValues {
 		valid := false
 		for _, listCol := range listCols {
 			if inputCol.Id > 0 && inputCol.Id == listCol.Id {
@@ -25,8 +27,8 @@ func (l *List) WriteRow(inputValues map[*Column]interface{}) error {
 
 	for _, listCol := range listCols {
 		valid := false
-		for inputCol := range inputValues {
-			if inputCol.Label == listCol.Label {
+		for inputCol := range incomingValues {
+			if inputCol.Id == listCol.Id {
 				valid = false
 			}
 		}
@@ -34,6 +36,8 @@ func (l *List) WriteRow(inputValues map[*Column]interface{}) error {
 			listDiff = append(listDiff, listCol)
 		}
 	}
+
+	return
 }
 
 // Column represents a List column
@@ -45,10 +49,6 @@ type Column struct {
 // DataProvider provides the data for a List
 type DataProvider interface {
 	GetData() [][]string
-}
-
-type RowWriter interface {
-	WriteRow(values map[*Column]interface{}) error
 }
 
 // Flattener can display a List
@@ -81,4 +81,8 @@ func (l *List) GetColumnNames() (names []string) {
 	}
 
 	return
+}
+
+type RowWriter interface {
+	WriteRow(values map[*Column]interface{}) (listDiff, inputDiff []*Column, err error)
 }
