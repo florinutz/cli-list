@@ -26,19 +26,19 @@ type RowWriter interface {
 }
 
 type HeaderFormatter interface {
-	FormatHeader(cols []*Column) (result string, err error)
+	FormatHeader(cols []*Column, cellFormatter CellFormatter) (result string, err error)
 }
 
-type RowsFormatter interface {
-	FormatRow(rows []Row, cellFormatter CellFormatter) (result string, err error)
+type RowFormatter interface {
+	FormatRow(row Row, cellFormatter CellFormatter) (result string, err error)
 }
 
 type CellFormatter interface {
-	FormatCell(value Value) (result string, err error)
+	FormatCell(value string) (result string, err error)
 }
 
 type TableFormatter interface {
-	FormatTable(table Table, headerFormatter HeaderFormatter, rowsFormatter RowsFormatter)
+	FormatTable(table Table, headerFormatter HeaderFormatter, rowFormatter RowFormatter)
 }
 
 // Value represents a cell's value
@@ -53,49 +53,21 @@ func NewTable(cols []*Column, writer RowWriter, formatter TableFormatter) *Table
 	}
 }
 
-func (t *Table) Write(incomingRow Row) (listDiff, inputDiff []*Column, err error) {
-	inputDiff, listDiff = getColDiffs(incomingRow, l.columns)
+func (t *Table) Write(row Row) (listDiff, inputDiff []*Column, err error) {
+	inputDiff, listDiff = getColDiffs(row, t.columns)
 	if len(inputDiff) > 0 {
 		err = errors.New("unknown input cols")
 		return
 	}
 
-	l.rows = append(l.rows, incomingRow)
-
-	return
-}
-
-func getColDiffs(incomingValues Row, listCols []*Column) (inputDiff, listDiff []*Column) {
-	for inputCol := range incomingValues {
-		valid := false
-		for _, listCol := range listCols {
-			if inputCol.Id > 0 && inputCol.Id == listCol.Id {
-				valid = false
-			}
-		}
-		if !valid {
-			inputDiff = append(inputDiff, inputCol)
-		}
-	}
-
-	for _, listCol := range listCols {
-		valid := false
-		for inputCol := range incomingValues {
-			if inputCol.Id > 0 && inputCol.Id == listCol.Id {
-				valid = false
-			}
-		}
-		if !valid {
-			listDiff = append(listDiff, listCol)
-		}
-	}
+	t.rows = append(t.rows, row)
 
 	return
 }
 
 // GetColumnNames returns column names
 func (t *Table) GetColumnNames() (names []string) {
-	for _, col := range l.columns {
+	for _, col := range t.columns {
 		names = append(names, col.Label)
 	}
 
@@ -103,5 +75,5 @@ func (t *Table) GetColumnNames() (names []string) {
 }
 
 func (t *Table) String() string {
-	panic("implement me")
+	//representation, err := t.Formatter.FormatTable(t)
 }
