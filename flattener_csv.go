@@ -8,7 +8,7 @@ import (
 )
 
 // CsvListFlattener flattens to CSV
-var CsvListFlattener FlattenerFunc = func(l List, hi StringHighlighterFunc, quiet bool) (string, error) {
+var CsvListFlattener FlattenerFunc = func(l Table, hi StringHighlighterFunc, quiet bool) (string, error) {
 	var buffer bytes.Buffer
 	w := csv.NewWriter(&buffer)
 

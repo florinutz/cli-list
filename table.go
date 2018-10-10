@@ -1,18 +1,71 @@
 package list
 
-// List aggregates all List components
-type List struct {
-	Columns []*Column
-	Data    [][]string
+import "github.com/pkg/errors"
+
+// Table aggregates all Table components
+type Table struct {
+	Writer    RowWriter
+	Formatter TableFormatter
+
+	columns []*Column
+	rows    []Row
 }
 
-func (l *List) WriteRow(incomingValues map[*Column]interface{}) (listDiff, inputDiff []*Column, err error) {
-	inputDiff, listDiff = getColDiffs(incomingValues, l.Columns)
-
-	return listDiff, inputDiff, nil
+// Column represents a Table column
+type Column struct {
+	Id    int
+	Label string
 }
 
-func getColDiffs(incomingValues map[*Column]interface{}, listCols []*Column) (inputDiff, listDiff []*Column) {
+// Row is a row
+type Row map[*Column]Value
+
+// Writer can write a row to something ( preferably a list ;) )
+type RowWriter interface {
+	Write(row Row) (listColsDiff, inputColsDiff []*Column, err error)
+}
+
+type HeaderFormatter interface {
+	FormatHeader(cols []*Column) (result string, err error)
+}
+
+type RowsFormatter interface {
+	FormatRow(rows []Row, cellFormatter CellFormatter) (result string, err error)
+}
+
+type CellFormatter interface {
+	FormatCell(value Value) (result string, err error)
+}
+
+type TableFormatter interface {
+	FormatTable(table Table, headerFormatter HeaderFormatter, rowsFormatter RowsFormatter)
+}
+
+// Value represents a cell's value
+type Value interface{}
+
+// NewTable instantiates a Table
+func NewTable(cols []*Column, writer RowWriter, formatter TableFormatter) *Table {
+	return &Table{
+		Writer:    writer,
+		Formatter: formatter,
+		columns:   cols,
+	}
+}
+
+func (t *Table) Write(incomingRow Row) (listDiff, inputDiff []*Column, err error) {
+	inputDiff, listDiff = getColDiffs(incomingRow, l.columns)
+	if len(inputDiff) > 0 {
+		err = errors.New("unknown input cols")
+		return
+	}
+
+	l.rows = append(l.rows, incomingRow)
+
+	return
+}
+
+func getColDiffs(incomingValues Row, listCols []*Column) (inputDiff, listDiff []*Column) {
 	for inputCol := range incomingValues {
 		valid := false
 		for _, listCol := range listCols {
@@ -28,7 +81,7 @@ func getColDiffs(incomingValues map[*Column]interface{}, listCols []*Column) (in
 	for _, listCol := range listCols {
 		valid := false
 		for inputCol := range incomingValues {
-			if inputCol.Id == listCol.Id {
+			if inputCol.Id > 0 && inputCol.Id == listCol.Id {
 				valid = false
 			}
 		}
@@ -40,49 +93,15 @@ func getColDiffs(incomingValues map[*Column]interface{}, listCols []*Column) (in
 	return
 }
 
-// Column represents a List column
-type Column struct {
-	Id    int
-	Label string
-}
-
-// DataProvider provides the data for a List
-type DataProvider interface {
-	GetData() [][]string
-}
-
-// Flattener can display a List
-type Flattener interface {
-	FlattenList(list List, hi StringHighlighterFunc, quiet bool) (string, error)
-}
-
-// NewList instantiates a List
-func NewList(cols []*Column, provider DataProvider) *List {
-	return &List{
-		Columns: cols,
-		Data:    provider.GetData(),
-	}
-}
-
-// Flatten flattens the List receiver to string
-func (l *List) Flatten(viewer Flattener, hi StringHighlighterFunc, quiet bool) (string, error) {
-	return viewer.FlattenList(*l, hi, quiet)
-}
-
-// GetData implements DataProvider
-func (l *List) GetData() [][]string {
-	return l.Data
-}
-
 // GetColumnNames returns column names
-func (l *List) GetColumnNames() (names []string) {
-	for _, col := range l.Columns {
+func (t *Table) GetColumnNames() (names []string) {
+	for _, col := range l.columns {
 		names = append(names, col.Label)
 	}
 
 	return
 }
 
-type RowWriter interface {
-	WriteRow(values map[*Column]interface{}) (listDiff, inputDiff []*Column, err error)
+func (t *Table) String() string {
+	panic("implement me")
 }

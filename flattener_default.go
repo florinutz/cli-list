@@ -10,7 +10,7 @@ import (
 )
 
 // DefaultListFlattener provides a default flattener with tabs
-var DefaultListFlattener FlattenerFunc = func(l List, hi StringHighlighterFunc, quiet bool) (string, error) {
+var DefaultListFlattener FlattenerFunc = func(l Table, hi StringHighlighterFunc, quiet bool) (string, error) {
 	var b strings.Builder
 	var DLFTabWriter = tabwriter.NewWriter(&b, 0, 0, 8, ' ', 0)
 
@@ -18,8 +18,8 @@ var DefaultListFlattener FlattenerFunc = func(l List, hi StringHighlighterFunc, 
 		return "", nil
 	}
 
-	if !quiet && len(l.Columns) > 0 {
-		format := getTabwriterFormat(len(l.Columns))
+	if !quiet && len(l.columns) > 0 {
+		format := getTabwriterFormat(len(l.columns))
 
 		is, err := interfaceSlice(l.GetColumnNames())
 		if err != nil {
