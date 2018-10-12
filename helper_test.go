@@ -20,10 +20,13 @@ func Test_getColDiffs(t *testing.T) {
 			"valid",
 			args{
 				Row{
-					&Column{1, "id"}: interface{}("val"),
+					Data: map[*Column]interface{}{
+						&Column{1, "id", nil}: interface{}("val"),
+					},
+					Formatter: nil,
 				},
 				[]*Column{
-					{1, "id"},
+					{1, "id", nil},
 				},
 			},
 			nil,
@@ -33,14 +36,17 @@ func Test_getColDiffs(t *testing.T) {
 			"diff",
 			args{
 				Row{
-					&Column{1, "id"}: interface{}("val"),
+					Data: map[*Column]interface{}{
+						&Column{1, "id", nil}: interface{}("val"),
+					},
+					Formatter: nil,
 				},
 				[]*Column{
-					{2, "id"},
+					{2, "id", nil},
 				},
 			},
-			[]*Column{{1, "id"}},
-			[]*Column{{2, "id"}},
+			[]*Column{{1, "id", nil}},
+			[]*Column{{2, "id", nil}},
 		},
 	}
 	for _, tt := range tests {

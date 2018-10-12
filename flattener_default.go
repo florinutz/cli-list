@@ -1,12 +1,5 @@
 package list
 
-import (
-	"reflect"
-	"strings"
-
-	"github.com/pkg/errors"
-)
-
 // DefaultListFlattener provides a default flattener with tabs
 var DefaultListFlattener FlattenerFunc = func(l Table, hi StringHighlighterFunc, quiet bool) (string, error) {
 	return "", nil
@@ -17,8 +10,8 @@ var DefaultListFlattener FlattenerFunc = func(l Table, hi StringHighlighterFunc,
 	// 	return "", nil
 	// }
 	//
-	// if !quiet && len(l.columns) > 0 {
-	// 	format := getTabwriterFormat(len(l.columns))
+	// if !quiet && len(l.cols) > 0 {
+	// 	format := getTabwriterFormat(len(l.cols))
 	//
 	// 	is, err := interfaceSlice(l.GetColumnNames())
 	// 	if err != nil {
@@ -51,29 +44,4 @@ var DefaultListFlattener FlattenerFunc = func(l Table, hi StringHighlighterFunc,
 	// }
 	//
 	// return b.String(), nil
-}
-
-func getTabwriterFormat(inputLen int) string {
-	var s []string
-
-	for i := 0; i < inputLen; i++ {
-		s = append(s, "%s")
-	}
-
-	return strings.Join(s, "\t") + "\n"
-}
-
-func interfaceSlice(slice interface{}) ([]interface{}, error) {
-	s := reflect.ValueOf(slice)
-	if s.Kind() != reflect.Slice {
-		return nil, errors.New("InterfaceSlice() given a non-slice type")
-	}
-
-	ret := make([]interface{}, s.Len())
-
-	for i := 0; i < s.Len(); i++ {
-		ret[i] = s.Index(i).Interface()
-	}
-
-	return ret, nil
 }
