@@ -1,21 +1,23 @@
 package list
 
-// Writer can write a row to something ( preferably a list ;) )
-type RowWriter interface {
-	Write(row Row) (listColsDiff, inputColsDiff []*Column, err error)
-}
+import "io"
 
 type TableFormatter interface {
-	FormatTable(table Table, headerFormatter HeaderFormatter, rowFormatter RowFormatter) (
-		result string, headerErrs, rowsErrs []error)
+	FormatTable(w io.Writer, table Table, headerFormatter HeaderFormatter, rowFormatter RowFormatter,
+		cellFormatter CellFormatter) (headerErrs, rowsErrs []error, err error)
 }
 
 type HeaderFormatter interface {
-	FormatHeader(cols []*Column, cellFormatter CellFormatter) (result string, errs []error)
+	FormatHeader(w io.Writer, cols []*Column, cellFormatter CellFormatter) (errs []error)
 }
 
 type RowFormatter interface {
-	FormatRow(row Row, cellFormatter CellFormatter) (result string, errs []error)
+	FormatRow(w io.Writer, row Row, cellFormatter CellFormatter) (errs []error)
+}
+
+// Writer can write a row to something ( preferably a list ;) )
+type RowWriter interface {
+	Write(row Row) (listColsDiff, inputColsDiff []*Column, err error)
 }
 
 type CellFormatter interface {

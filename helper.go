@@ -1,5 +1,7 @@
 package list
 
+import "strings"
+
 func getColDiffs(incomingValues Row, listCols []*Column) (inputDiff, listDiff []*Column) {
 	for inputCol := range incomingValues.Data {
 		valid := false
@@ -26,4 +28,14 @@ func getColDiffs(incomingValues Row, listCols []*Column) (inputDiff, listDiff []
 	}
 
 	return
+}
+
+func getTabwriterFormat(inputLen int) string {
+	var s []string
+
+	for i := 0; i < inputLen; i++ {
+		s = append(s, "%s")
+	}
+
+	return strings.Join(s, "\t") + "\t\n"
 }

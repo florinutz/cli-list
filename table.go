@@ -54,7 +54,3 @@ func (t *Table) GetColumnNames() (names []string) {
 
 	return
 }
-
-func (t *Table) String() string {
-	//representation, err := t.Formatter.FormatTable(t)
-}
