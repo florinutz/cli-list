@@ -43,9 +43,10 @@ th ree        fou,r        five
 		},
 		{
 			name: "table",
-			f:    list.TableFormatter,
+			f:    &list.TableFormatter{Columns: []string{"col1", "col2", "col3"}},
 			args: args{data: data},
-			wantOutput: `one           two          three        
+			wantOutput: `col1          col2         col3         
+one           two          three        
 th ree        fou,r        five         
 `,
 			wantErr: false,

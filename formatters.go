@@ -27,9 +27,7 @@ var CsvFormatter FormatterFunc = func(writer io.Writer, data [][]string) error {
 	if len(data) == 0 {
 		return nil
 	}
-
 	w := csv.NewWriter(writer)
-
 	err := w.WriteAll(data)
 	if err != nil {
 		return errors.Wrap(err, "couldn't write data to csv buffer")
@@ -67,9 +65,9 @@ type TableFormatter struct {
 }
 
 func (f *TableFormatter) Format(writer io.Writer, data [][]string) error {
-	if len(data) == 0 || (len(data) != len(f.Columns)) {
+	if len(data) == 0 || len(data[0]) != len(f.Columns) {
 		return fmt.Errorf("the number of data columns (%d) doest't correspond "+
-			"to the number of table cols (%d)", len(data), len(f.Columns))
+			"to the number of table cols (%d)", len(data[0]), len(f.Columns))
 	}
 	newData := append([][]string{f.Columns}, data...)
 
