@@ -12,12 +12,15 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Formatter is implemented by each formatter below
 type Formatter interface {
 	Format(writer io.Writer, data [][]string) error
 }
 
+// FormatterFunc provides a func type for simple formatters (e.g. CsvFormatter)
 type FormatterFunc func(writer io.Writer, data [][]string) error
 
+// Format is the implementation of the Formatter interface for FormatterFunc
 func (f FormatterFunc) Format(writer io.Writer, data [][]string) error {
 	return f(writer, data)
 }
@@ -36,6 +39,7 @@ var CsvFormatter FormatterFunc = func(writer io.Writer, data [][]string) error {
 	return nil
 }
 
+// TableFormatter displays the data in rows separated by tabs (using text/tabwriter)
 var TabsFormatter FormatterFunc = func(writer io.Writer, data [][]string) error {
 	var DLFTabWriter = tabwriter.NewWriter(writer, 0, 0, 8, ' ', 0)
 
@@ -60,10 +64,13 @@ var TabsFormatter FormatterFunc = func(writer io.Writer, data [][]string) error 
 	return nil
 }
 
+// TableFormatter adds a header row to the TabsFormatter
+// todo use github.com/olekukonko/tablewriter for proper tables
 type TableFormatter struct {
 	Columns []string
 }
 
+// Format implements Formatter
 func (f *TableFormatter) Format(writer io.Writer, data [][]string) error {
 	if len(data) == 0 || len(data[0]) != len(f.Columns) {
 		return fmt.Errorf("the number of data columns (%d) doest't correspond "+
